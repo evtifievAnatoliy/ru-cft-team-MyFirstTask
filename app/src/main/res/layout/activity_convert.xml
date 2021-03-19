@@ -56,13 +56,23 @@
                 android:padding="8dp" />
 
             <Button
-                android:id="@+id/buttonConvertInActivityConvert"
+                android:id="@+id/buttonConvertFromRUInActivityConvert"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="8dp"
-                android:onClick="onClickButtonConvertInActivityConvert"
+                android:onClick="onClickButtonConvertFromRUInActivityConvert"
                 android:padding="8dp"
-                android:text="@string/buttonConvertInActivityConvert"
+                android:text="@string/buttonConvertFromRUInActivityConvert"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/buttonConvertINRUInActivityConvert"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="8dp"
+                android:onClick="onClickButtonConvertInRUInActivityConvert"
+                android:padding="8dp"
+                android:text="@string/buttonConvertInRUInActivityConvert"
                 android:textSize="14sp" />
 
             <TextView
@@ -79,7 +89,6 @@
         android:id="@+id/buttonMsg"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
         android:onClick="onClickButtonSendMsg"
         android:text="@string/buttonSentMsg"
         app:layout_constraintBottom_toTopOf="@+id/buttonBackFromActivityConvert"
