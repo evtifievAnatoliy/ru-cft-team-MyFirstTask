@@ -114,8 +114,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startDownloadJSONTask(){
-        DownloadJSONTask task = new DownloadJSONTask(arrayAdapter, buttonUpdate, updateTimeStr, getResources().getString(R.string.buttonUpdate), this);
-        task.execute("https://www.cbr-xml-daily.ru/daily_json.js");
+        try {
+            DownloadJSONTask task = new DownloadJSONTask(arrayAdapter, buttonUpdate, updateTimeStr, getResources().getString(R.string.buttonUpdate), this);
+            task.execute("https://www.cbr-xml-daily.ru/daily_json.js");
+        }
+        catch (Exception e){
+            Toast.makeText(this, "Update Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     //класс для асинхронного получения данных с сервера валют.
@@ -134,6 +139,8 @@ public class MainActivity extends AppCompatActivity {
             this.buttonUpdateName = buttonUpdateName;
             this.mainActivity = mainActivity;
         }
+
+
 
         @Override
         protected String doInBackground(String... strings) {
@@ -156,17 +163,17 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return result.toString();
             } catch (MalformedURLException e) {
-                Toast.makeText(mainActivity, "Update Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                //запись в лог
             } catch (IOException e) {
-                Toast.makeText(mainActivity, "Update Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                //запись в лог
             }
             catch (Exception e) {
-                Toast.makeText(mainActivity, "Update Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                //запись в лог
             }finally
             {
                 if (connection != null) {
-                    connection.disconnect();
-                }
+                        connection.disconnect();
+                    }
             }
             return null;
         }
@@ -176,17 +183,21 @@ public class MainActivity extends AppCompatActivity {
             super.onPostExecute(s);
             try {
                 //обновляем данные в контроллере
-                MainController.getInstance().getExchangeRates().setMapFromStr(s);
-                //добавляем информацию об времени обновления на кнопку Update
-                Time time = new Time(Time.getCurrentTimezone());
-                time.setToNow();
-                updateTimeStr = String.format(Locale.getDefault(), "%d-%02d-%02d %02d:%02d:%02d",
-                        time.year, time.month+1, time.monthDay,
-                        time.hour, time.minute, time.second);
-                buttonUpdate.setText(buttonUpdateName + "(" + updateTimeStr + ")");
-                arrayAdapter.notifyDataSetChanged();
-                //выводим сообщение об удачном обновлении пользователю
-                Toast.makeText(mainActivity, "Update Completed", Toast.LENGTH_SHORT).show();
+                if(s!=null) {
+                    MainController.getInstance().getExchangeRates().setMapFromStr(s);
+                    //добавляем информацию об времени обновления на кнопку Update
+                    Time time = new Time(Time.getCurrentTimezone());
+                    time.setToNow();
+                    updateTimeStr = String.format(Locale.getDefault(), "%d-%02d-%02d %02d:%02d:%02d",
+                            time.year, time.month + 1, time.monthDay,
+                            time.hour, time.minute, time.second);
+                    buttonUpdate.setText(buttonUpdateName + "(" + updateTimeStr + ")");
+                    arrayAdapter.notifyDataSetChanged();
+                    //выводим сообщение об удачном обновлении пользователю
+                    Toast.makeText(mainActivity, "Update Completed", Toast.LENGTH_SHORT).show();
+                }
+                else
+                    Toast.makeText(mainActivity, "Update error", Toast.LENGTH_SHORT).show();
             } catch (JSONException e) {
                 Toast.makeText(mainActivity, "Update Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }

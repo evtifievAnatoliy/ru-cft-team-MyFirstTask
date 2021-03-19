@@ -31,24 +31,26 @@ public class ExchangeRates {
     }
 
     public void setMapFromStr(String str) throws JSONException {
-        JSONObject jsonObject = new JSONObject(str);
-        JSONObject jsonValute = jsonObject.getJSONObject("Valute");
-        Iterator<String> iter = jsonValute.keys();
-        while (iter.hasNext()) {
-            String key = iter.next();
-            JSONObject iterObject = jsonValute.getJSONObject(key);
-            ExchangeRate exchangeRate = new ExchangeRate(
-                    iterObject.getString("ID"),
-                    iterObject.getString("CharCode"),
-                    iterObject.getInt("Nominal"),
-                    iterObject.getString("Name"),
-                    iterObject.getDouble("Value")
-            );
-            if (map.get(exchangeRate.getId())==null)
-                list.add(exchangeRate);
-            map.put(exchangeRate.getId(), exchangeRate);
+        if (str!=null) {
+            JSONObject jsonObject = new JSONObject(str);
+            JSONObject jsonValute = jsonObject.getJSONObject("Valute");
+            Iterator<String> iter = jsonValute.keys();
+            while (iter.hasNext()) {
+                String key = iter.next();
+                JSONObject iterObject = jsonValute.getJSONObject(key);
+                ExchangeRate exchangeRate = new ExchangeRate(
+                        iterObject.getString("ID"),
+                        iterObject.getString("CharCode"),
+                        iterObject.getInt("Nominal"),
+                        iterObject.getString("Name"),
+                        iterObject.getDouble("Value")
+                );
+                if (map.get(exchangeRate.getId()) == null)
+                    list.add(exchangeRate);
+                map.put(exchangeRate.getId(), exchangeRate);
+            }
+            updateList();
         }
-        updateList();
     }
 
     private void updateList(){
