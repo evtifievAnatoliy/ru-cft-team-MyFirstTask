@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Currency exchange rates</string>
+    <string name="buttonUpdate">Update</string>
+    <string name="labelSumTextViewFromActivityConvert">Enter the amount in rubles</string>
+    <string name="labelConvertRatesTextViewFromActivityConvert">Select a currency</string>
+    <string name="buttonConvertInActivityConvert">Convert</string>
+    <string name="buttonBackFromActivityConvert">Back</string>
+    <string name="buttonSentMsg">Send message</string>
+    <string name="chooser_title">Please, choose how to send</string>
+    <string name="result_conver_string">Сумма для конвертации: %d. Выбранная валюта: %s. Вы можете купить %.2f %s на эту сумму.</string>
+
+</resources>

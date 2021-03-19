@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Курсы валют</string>
+    <string name="buttonUpdate">Обновить</string>
+    <string name="labelSumTextViewFromActivityConvert">Введите сумму в рублях</string>
+    <string name="labelConvertRatesTextViewFromActivityConvert">Выберите валюту</string>
+    <string name="buttonConvertInActivityConvert">Конвертировать</string>
+    <string name="buttonBackFromActivityConvert">Назад</string>
+    <string name="buttonSentMsg">Отправить сообщение</string>
+    <string name="chooser_title">Выберите программу отправки</string>
+    <string name="result_conver_string">Сумма для конвертации: %d. Выбранная валюта: %s. Вы можете купить %.2f %s на эту сумму.</string>
+</resources>
