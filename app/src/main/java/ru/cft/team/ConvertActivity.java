@@ -44,16 +44,36 @@ public class ConvertActivity extends AppCompatActivity {
         finish();
     }
 
-    public void onClickButtonConvertInActivityConvert(View view) {
+    public void onClickButtonConvertFromRUInActivityConvert(View view) {
         if(editTextNumberFromActivityConvert.getText().toString().isEmpty())
             Toast.makeText(this, getResources().getString(R.string.labelSumTextViewFromActivityConvert), Toast.LENGTH_SHORT).show();
         else {
             try {
                 int amount = Integer.parseInt(editTextNumberFromActivityConvert.getText().toString());
                 ExchangeRate exchangeRate = (ExchangeRate) spinnerExchangeRates.getSelectedItem();
-                double d = exchangeRate.getNumbersForAmount(amount);
-                String resultStr = String.format(Locale.getDefault(), getResources().getString(R.string.result_conver_string),
-                        amount, exchangeRate.getName(), exchangeRate.getNumbersForAmount(amount), exchangeRate.getCharCode());
+                double d = exchangeRate.getNumbersForAmountFromRU(amount);
+                String resultStr = String.format(Locale.getDefault(), getResources().getString(R.string.result_conver_string_from_RU),
+                        amount, exchangeRate.getName(), exchangeRate.getNumbersForAmountFromRU(amount), exchangeRate.getCharCode());
+                resultTextViewFromActivityConver.setText(resultStr);
+            } catch (NullPointerException e) {
+                Toast.makeText(this, "NullPointerException: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "NumberFormatException: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+
+        }
+    }
+
+    public void onClickButtonConvertInRUInActivityConvert(View view) {
+        if (editTextNumberFromActivityConvert.getText().toString().isEmpty())
+            Toast.makeText(this, getResources().getString(R.string.labelSumTextViewFromActivityConvert), Toast.LENGTH_SHORT).show();
+        else {
+            try {
+                int amount = Integer.parseInt(editTextNumberFromActivityConvert.getText().toString());
+                ExchangeRate exchangeRate = (ExchangeRate) spinnerExchangeRates.getSelectedItem();
+                double d = exchangeRate.getNumbersForAmountInRU(amount);
+                String resultStr = String.format(Locale.getDefault(), getResources().getString(R.string.result_conver_string_in_RU),
+                        amount, exchangeRate.getName(), exchangeRate.getNumbersForAmountInRU(amount));
                 resultTextViewFromActivityConver.setText(resultStr);
             } catch (NullPointerException e) {
                 Toast.makeText(this, "NullPointerException: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -72,4 +92,8 @@ public class ConvertActivity extends AppCompatActivity {
         Intent chosenIntent = Intent.createChooser(sendMsgIntent, getString(R.string.chooser_title));
         startActivity(chosenIntent);
     }
+
+
+
+
 }
