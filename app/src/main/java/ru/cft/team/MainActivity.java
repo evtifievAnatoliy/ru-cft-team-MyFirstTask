@@ -178,10 +178,10 @@ public class MainActivity extends AppCompatActivity {
                 //обновляем данные в контроллере
                 MainController.getInstance().getExchangeRates().setMapFromStr(s);
                 //добавляем информацию об времени обновления на кнопку Update
-                Time time = new Time();
+                Time time = new Time(Time.getCurrentTimezone());
                 time.setToNow();
                 updateTimeStr = String.format(Locale.getDefault(), "%d-%02d-%02d %02d:%02d:%02d",
-                        time.year, time.month, time.monthDay,
+                        time.year, time.month+1, time.monthDay,
                         time.hour, time.minute, time.second);
                 buttonUpdate.setText(buttonUpdateName + "(" + updateTimeStr + ")");
                 arrayAdapter.notifyDataSetChanged();
