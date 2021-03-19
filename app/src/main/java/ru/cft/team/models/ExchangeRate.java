@@ -67,6 +67,7 @@ public class ExchangeRate implements Comparable<ExchangeRate>{
         return charCode + " " + nominal + " " + name + " - " + value ;
     }
 
+    //метод конвертации суммы в рублях в валюту
     public double getNumbersForAmount (int anount){
         double oneRate  = getValue()/getNominal();
         return anount/oneRate;

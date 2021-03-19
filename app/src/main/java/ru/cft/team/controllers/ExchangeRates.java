@@ -13,8 +13,11 @@ import java.util.Map;
 import ru.cft.team.models.ExchangeRate;
 
 public class ExchangeRates {
+    //list использую из-за возможности сортировки, в сортировке используется индекс выбираемости элементов
     List <ExchangeRate> list;
+    //map необходим для получения валют и обновления их в list
     Map <String, ExchangeRate> map;
+    //map для хранения индексов наиболее часто выбираемых валют
     Map <String, Integer> repeatMap;
 
     public ExchangeRates() {

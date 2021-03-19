@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
                 onClickItemListViewExchangeRates(position);
             }
         });
+        //если активность запускается не первый раз
         if(savedInstanceState!=null) {
             updateTimeStr = savedInstanceState.getString("updateTimeStr");
             buttonUpdate.setText(getResources().getString(R.string.buttonUpdate) + "(" + updateTimeStr + ")");
@@ -77,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    //метод автоматического обновления
     private void runUpdatingExchangeRates(){
         final Handler handler = new Handler();
         final long updateTime = 60000*360;
@@ -111,12 +113,12 @@ public class MainActivity extends AppCompatActivity {
         isRunning = true;
     }
 
-
     private void startDownloadJSONTask(){
         DownloadJSONTask task = new DownloadJSONTask(arrayAdapter, buttonUpdate, updateTimeStr, getResources().getString(R.string.buttonUpdate), this);
         task.execute("https://www.cbr-xml-daily.ru/daily_json.js");
     }
 
+    //класс для асинхронного получения данных с сервера валют.
     private static class DownloadJSONTask extends AsyncTask<String, Void, String>{
 
         private ArrayAdapter<ExchangeRate> arrayAdapter;
@@ -173,7 +175,9 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             try {
+                //обновляем данные в контроллере
                 MainController.getInstance().getExchangeRates().setMapFromStr(s);
+                //добавляем информацию об времени обновления на кнопку Update
                 Time time = new Time();
                 time.setToNow();
                 updateTimeStr = String.format(Locale.getDefault(), "%d-%02d-%02d %02d:%02d:%02d",
@@ -181,9 +185,10 @@ public class MainActivity extends AppCompatActivity {
                         time.hour, time.minute, time.second);
                 buttonUpdate.setText(buttonUpdateName + "(" + updateTimeStr + ")");
                 arrayAdapter.notifyDataSetChanged();
+                //выводим сообщение об удачном обновлении пользователю
                 Toast.makeText(mainActivity, "Update Completed", Toast.LENGTH_SHORT).show();
             } catch (JSONException e) {
-                e.printStackTrace();
+                Toast.makeText(mainActivity, "Update Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }

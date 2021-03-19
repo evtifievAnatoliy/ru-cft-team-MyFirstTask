@@ -17,7 +17,8 @@ import ru.cft.team.controllers.MainController;
 import ru.cft.team.models.ExchangeRate;
 
 public class ConvertActivity extends AppCompatActivity {
-
+    //Spiner изначально устанавливается на выбранном элементе из главной антивности
+    //Использую именно Spiner, т.к. хочу дать возможность пользователю выбрать так же другую валюту для конвертации
     private Spinner spinnerExchangeRates;
     private EditText editTextNumberFromActivityConvert;
     private TextView resultTextViewFromActivityConver;
