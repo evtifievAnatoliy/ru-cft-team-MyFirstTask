@@ -11,4 +11,5 @@
     <string name="buttonConvertInRUInActivityConvert">Конвертировать в рубли</string>
     <string name="result_conver_string_from_RU">Сумма для конвертации: %d. Выбранная валюта: %s. Вы можете купить %.2f %s на эту сумму.</string>
     <string name="result_conver_string_in_RU">Сумма для конвертации: %d. Выбранная валюта: %s. Сумма в рублях: %.2f.</string>
+    <string name="url">https://www.cbr-xml-daily.ru/daily_json.js</string>
 </resources>

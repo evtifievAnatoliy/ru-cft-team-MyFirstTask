@@ -14,9 +14,14 @@ import android.widget.Toast;
 import java.util.Locale;
 
 import ru.cft.team.controllers.MainController;
+import ru.cft.team.db.ExchangeRatesDBHelper;
 import ru.cft.team.models.ExchangeRate;
 
 public class ConvertActivity extends AppCompatActivity {
+
+    //подключаем базу данных
+    private ExchangeRatesDBHelper dbHelper;
+
     //Spiner изначально устанавливается на выбранном элементе из главной антивности
     //Использую именно Spiner, т.к. хочу дать возможность пользователю выбрать так же другую валюту для конвертации
     private Spinner spinnerExchangeRates;
@@ -34,8 +39,10 @@ public class ConvertActivity extends AppCompatActivity {
         editTextNumberFromActivityConvert = (EditText) findViewById(R.id.editTextNumberFromActivityConvert);
         resultTextViewFromActivityConver = (TextView) findViewById(R.id.resultTextViewFromActivityConvert);
 
+        dbHelper = new ExchangeRatesDBHelper(this);
+
         arrayAdapter = new ArrayAdapter<ExchangeRate> (this, android.R.layout.simple_list_item_1,
-                MainController.getInstance().getExchangeRates().getList());
+                MainController.getInstance(dbHelper).getExchangeRates().getList());
         spinnerExchangeRates.setAdapter(arrayAdapter);
         spinnerExchangeRates.setSelection(intent.getIntExtra("selectedItem", 0));
     }

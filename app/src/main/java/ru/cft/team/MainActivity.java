@@ -4,9 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.text.format.Time;
 import android.view.View;
 import android.widget.AdapterView;
@@ -30,9 +32,14 @@ import java.util.Locale;
 import javax.net.ssl.HttpsURLConnection;
 
 import ru.cft.team.controllers.MainController;
+import ru.cft.team.db.ExchangeRatesDBHelper;
 import ru.cft.team.models.ExchangeRate;
 
 public class MainActivity extends AppCompatActivity {
+
+
+    //подключаем базу данных
+    private ExchangeRatesDBHelper dbHelper;
 
     private ListView listViewExchangeRates;
     private Button buttonUpdate;
@@ -40,15 +47,20 @@ public class MainActivity extends AppCompatActivity {
     private String updateTimeStr;
     private boolean isRunning = false;
 
+    public ExchangeRatesDBHelper getDbHelper() {
+        return dbHelper;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dbHelper = new ExchangeRatesDBHelper(this);
         isRunning = true;
         setContentView(R.layout.activity_main);
         listViewExchangeRates = (ListView) findViewById(R.id.listViewExchangeRates);
         buttonUpdate = (Button) findViewById(R.id.buttonUpdate);
         arrayAdapter = new ArrayAdapter<ExchangeRate> (this, android.R.layout.simple_list_item_1,
-                MainController.getInstance().getExchangeRates().getList());
+                MainController.getInstance(dbHelper).getExchangeRates().getList());
         listViewExchangeRates.setAdapter(arrayAdapter);
         listViewExchangeRates.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         listViewExchangeRates.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -62,6 +74,13 @@ public class MainActivity extends AppCompatActivity {
             updateTimeStr = savedInstanceState.getString("updateTimeStr");
             buttonUpdate.setText(getResources().getString(R.string.buttonUpdate) + "(" + updateTimeStr + ")");
         }
+        else{
+            //Если запускаем первый раз, то читаем дату последнего обновления из  SharedPreferences (постоянное хранение данных)
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            String str = preferences.getString("updateTimeStr", "first");
+            buttonUpdate.setText(getResources().getString(R.string.buttonUpdate) + "(" +
+                    preferences.getString("updateTimeStr", "first") + ")");
+        }
         runUpdatingExchangeRates();
     }
 
@@ -72,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     public void onClickItemListViewExchangeRates(int selectedItem) {
         Intent intent = new Intent(this, ConvertActivity.class);
         intent.putExtra("selectedItem", selectedItem);
-        MainController.getInstance().getExchangeRates().setItemToRepeatMap(
+        MainController.getInstance(dbHelper).getExchangeRates().setItemToRepeatMap(
                 (ExchangeRate) listViewExchangeRates.getItemAtPosition(selectedItem)
         );
         startActivity(intent);
@@ -82,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
     private void runUpdatingExchangeRates(){
         final Handler handler = new Handler();
         final long updateTime = 60000*360;
-        handler.post(new Runnable() {
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if(isRunning) {
@@ -90,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 handler.postDelayed(this, updateTime);
             }
-        });
+        }, updateTime);
 
     }
 
@@ -116,7 +135,8 @@ public class MainActivity extends AppCompatActivity {
     private void startDownloadJSONTask(){
         try {
             DownloadJSONTask task = new DownloadJSONTask(arrayAdapter, buttonUpdate, updateTimeStr, getResources().getString(R.string.buttonUpdate), this);
-            task.execute("https://www.cbr-xml-daily.ru/daily_json.js");
+            task.execute(getResources().getString(R.string.url));
+
         }
         catch (Exception e){
             Toast.makeText(this, "Update Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -184,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 //обновляем данные в контроллере
                 if(s!=null) {
-                    MainController.getInstance().getExchangeRates().setMapFromStr(s);
+                    MainController.getInstance(mainActivity.getDbHelper()).getExchangeRates().setMapFromStr(s);
                     //добавляем информацию об времени обновления на кнопку Update
                     Time time = new Time(Time.getCurrentTimezone());
                     time.setToNow();
@@ -193,6 +213,9 @@ public class MainActivity extends AppCompatActivity {
                             time.hour, time.minute, time.second);
                     buttonUpdate.setText(buttonUpdateName + "(" + updateTimeStr + ")");
                     arrayAdapter.notifyDataSetChanged();
+                    //Добавление последней даты обновления в  SharedPreferences (постоянное хранение данных)
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
+                    preferences.edit().putString("updateTimeStr", updateTimeStr).apply();
                     //выводим сообщение об удачном обновлении пользователю
                     Toast.makeText(mainActivity, "Update Completed", Toast.LENGTH_SHORT).show();
                 }

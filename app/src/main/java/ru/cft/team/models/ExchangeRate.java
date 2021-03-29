@@ -17,6 +17,11 @@ public class ExchangeRate implements Comparable<ExchangeRate>{
         this.repeatIndex = 0;
     }
 
+    public ExchangeRate(String id, String charCode, int nominal, String name, double value, Integer repeatIndex) {
+        this(id, charCode, nominal, name, value);
+        this.repeatIndex = repeatIndex;
+    }
+
     public String getId() {
         return id;
     }
