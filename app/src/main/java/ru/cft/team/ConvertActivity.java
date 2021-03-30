@@ -1,5 +1,6 @@
 package ru.cft.team;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -28,7 +29,10 @@ public class ConvertActivity extends AppCompatActivity {
     private EditText editTextNumberFromActivityConvert;
     private TextView resultTextViewFromActivityConver;
 
-   private ExchangeRate exchangeRate;
+    //валюта
+    private ExchangeRate exchangeRate;
+    //текст который выводится после конвертации валюты
+    private String resultStr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +47,13 @@ public class ConvertActivity extends AppCompatActivity {
         Object o = intent.getStringExtra("selectedItem");
         exchangeRate = MainController.getInstance(database).getExchangeRates().getExchangeRate(o.toString());
         exchangeRateTextViewFromActivityConvert.setText(exchangeRate.toString());
+
+        //если активность запускается не первый раз
+        if(savedInstanceState!=null) {
+            resultStr = savedInstanceState.getString("resultStr");
+            resultTextViewFromActivityConver.setText(resultStr);
+
+        }
     }
 
     public void onClickbuttonBackFromActivityConvert(View view) {
@@ -56,7 +67,7 @@ public class ConvertActivity extends AppCompatActivity {
             try {
                 int amount = Integer.parseInt(editTextNumberFromActivityConvert.getText().toString());
                 double d = exchangeRate.getNumbersForAmountFromRU(amount);
-                String resultStr = String.format(Locale.getDefault(), getResources().getString(R.string.result_conver_string_from_RU),
+                resultStr = String.format(Locale.getDefault(), getResources().getString(R.string.result_conver_string_from_RU),
                         amount, exchangeRate.getName(), exchangeRate.getNumbersForAmountFromRU(amount), exchangeRate.getCharCode());
                 resultTextViewFromActivityConver.setText(resultStr);
             } catch (NullPointerException e) {
@@ -75,7 +86,7 @@ public class ConvertActivity extends AppCompatActivity {
             try {
                 int amount = Integer.parseInt(editTextNumberFromActivityConvert.getText().toString());
                 double d = exchangeRate.getNumbersForAmountInRU(amount);
-                String resultStr = String.format(Locale.getDefault(), getResources().getString(R.string.result_conver_string_in_RU),
+                resultStr = String.format(Locale.getDefault(), getResources().getString(R.string.result_conver_string_in_RU),
                         amount, exchangeRate.getName(), exchangeRate.getNumbersForAmountInRU(amount));
                 resultTextViewFromActivityConver.setText(resultStr);
             } catch (NullPointerException e) {
@@ -96,6 +107,11 @@ public class ConvertActivity extends AppCompatActivity {
         startActivity(chosenIntent);
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("resultStr", resultStr);
+    }
 
 
 

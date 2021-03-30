@@ -43,9 +43,10 @@ public class ExchangeRates {
         return list;
     }
 
-    public void setMapFromStr(String str) throws JSONException {
+    public String setMapFromStr(String str) throws JSONException {
         if (str!=null) {
             JSONObject jsonObject = new JSONObject(str);
+            String timeStampStr = jsonObject.getString("Timestamp");
             JSONObject jsonValute = jsonObject.getJSONObject("Valute");
             Iterator<String> iter = jsonValute.keys();
             while (iter.hasNext()) {
@@ -69,7 +70,9 @@ public class ExchangeRates {
 
             }
             updateList();
+            return timeStampStr;
         }
+        return null;
     }
 
     private void updateList(){
@@ -89,7 +92,7 @@ public class ExchangeRates {
         }
         else{
             repeatMap.put(exchangeRate.getIdFromService(), repeatMap.get(exchangeRate.getIdFromService()) + 1);
-            exchangeRate.setRepeatIndex(repeatMap.get(exchangeRate.getIdFromService()) + 1);
+            exchangeRate.setRepeatIndex(repeatMap.get(exchangeRate.getIdFromService()));
 
         }
         database.exchangeRatesDao().updateExchangeRate(exchangeRate);

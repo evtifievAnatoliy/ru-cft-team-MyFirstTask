@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.sql.Timestamp;
 import java.util.Locale;
 
 
@@ -205,13 +206,15 @@ public class MainActivity extends AppCompatActivity {
             try {
                 //обновляем данные в контроллере
                 if(s!=null) {
-                    MainController.getInstance(mainActivity.getDatabase()).getExchangeRates().setMapFromStr(s);
+                    updateTimeStr = MainController.getInstance(mainActivity.getDatabase()).getExchangeRates().setMapFromStr(s);
                     //добавляем информацию об времени обновления на кнопку Update
-                    Time time = new Time(Time.getCurrentTimezone());
-                    time.setToNow();
-                    updateTimeStr = String.format(Locale.getDefault(), "%d-%02d-%02d %02d:%02d:%02d",
-                            time.year, time.month + 1, time.monthDay,
-                            time.hour, time.minute, time.second);
+                    if (updateTimeStr != null) {
+                        String[] updateTimeStrs = updateTimeStr.split("[T+]");
+                        if (updateTimeStrs.length > 2)
+                            updateTimeStr = updateTimeStrs[0] + " " + updateTimeStrs[1];
+                    }
+                    else
+                        updateTimeStr = "ParseAtrIsNull";
                     buttonUpdate.setText(buttonUpdateName + "(" + updateTimeStr + ")");
                     arrayAdapter.notifyDataSetChanged();
                     //Добавление последней даты обновления в  SharedPreferences (постоянное хранение данных)
