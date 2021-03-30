@@ -14,37 +14,35 @@ import android.widget.Toast;
 import java.util.Locale;
 
 import ru.cft.team.controllers.MainController;
-import ru.cft.team.db.ExchangeRatesDBHelper;
+import ru.cft.team.dao.ExchangeRatesDatabase;
 import ru.cft.team.models.ExchangeRate;
 
 public class ConvertActivity extends AppCompatActivity {
 
     //подключаем базу данных
-    private ExchangeRatesDBHelper dbHelper;
+    private ExchangeRatesDatabase database;
 
     //Spiner изначально устанавливается на выбранном элементе из главной антивности
     //Использую именно Spiner, т.к. хочу дать возможность пользователю выбрать так же другую валюту для конвертации
-    private Spinner spinnerExchangeRates;
+    private TextView exchangeRateTextViewFromActivityConvert;
     private EditText editTextNumberFromActivityConvert;
     private TextView resultTextViewFromActivityConver;
 
-    private ArrayAdapter<ExchangeRate> arrayAdapter;
+   private ExchangeRate exchangeRate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_convert);
         Intent intent = getIntent();
-        spinnerExchangeRates = (Spinner) findViewById(R.id.spinnerConvertInActivityConvert);
-        editTextNumberFromActivityConvert = (EditText) findViewById(R.id.editTextNumberFromActivityConvert);
-        resultTextViewFromActivityConver = (TextView) findViewById(R.id.resultTextViewFromActivityConvert);
+        exchangeRateTextViewFromActivityConvert = findViewById(R.id.exchangeRateTextViewFromActivityConvert);
+        editTextNumberFromActivityConvert = findViewById(R.id.editTextNumberFromActivityConvert);
+        resultTextViewFromActivityConver = findViewById(R.id.resultTextViewFromActivityConvert);
+        database = ExchangeRatesDatabase.getInstance(this);
 
-        dbHelper = new ExchangeRatesDBHelper(this);
-
-        arrayAdapter = new ArrayAdapter<ExchangeRate> (this, android.R.layout.simple_list_item_1,
-                MainController.getInstance(dbHelper).getExchangeRates().getList());
-        spinnerExchangeRates.setAdapter(arrayAdapter);
-        spinnerExchangeRates.setSelection(intent.getIntExtra("selectedItem", 0));
+        Object o = intent.getStringExtra("selectedItem");
+        exchangeRate = MainController.getInstance(database).getExchangeRates().getExchangeRate(o.toString());
+        exchangeRateTextViewFromActivityConvert.setText(exchangeRate.toString());
     }
 
     public void onClickbuttonBackFromActivityConvert(View view) {
@@ -57,7 +55,6 @@ public class ConvertActivity extends AppCompatActivity {
         else {
             try {
                 int amount = Integer.parseInt(editTextNumberFromActivityConvert.getText().toString());
-                ExchangeRate exchangeRate = (ExchangeRate) spinnerExchangeRates.getSelectedItem();
                 double d = exchangeRate.getNumbersForAmountFromRU(amount);
                 String resultStr = String.format(Locale.getDefault(), getResources().getString(R.string.result_conver_string_from_RU),
                         amount, exchangeRate.getName(), exchangeRate.getNumbersForAmountFromRU(amount), exchangeRate.getCharCode());
@@ -77,7 +74,6 @@ public class ConvertActivity extends AppCompatActivity {
         else {
             try {
                 int amount = Integer.parseInt(editTextNumberFromActivityConvert.getText().toString());
-                ExchangeRate exchangeRate = (ExchangeRate) spinnerExchangeRates.getSelectedItem();
                 double d = exchangeRate.getNumbersForAmountInRU(amount);
                 String resultStr = String.format(Locale.getDefault(), getResources().getString(R.string.result_conver_string_in_RU),
                         amount, exchangeRate.getName(), exchangeRate.getNumbersForAmountInRU(amount));

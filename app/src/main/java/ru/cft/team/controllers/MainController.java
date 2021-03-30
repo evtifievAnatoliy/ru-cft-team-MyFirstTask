@@ -1,20 +1,22 @@
 package ru.cft.team.controllers;
 
-import ru.cft.team.MainActivity;
-import ru.cft.team.db.ExchangeRatesDBHelper;
+import ru.cft.team.dao.ExchangeRatesDatabase;
 
 public class MainController {
 
     private static MainController instance;
-    private ExchangeRates exchangeRates;
+    private final ExchangeRates exchangeRates;
+    private static final Object LOCK = new Object();
 
-    public MainController(ExchangeRatesDBHelper dbHelper){
-        exchangeRates = new ExchangeRates(dbHelper);
+    public MainController(ExchangeRatesDatabase database){
+        exchangeRates = new ExchangeRates(database);
     }
 
-    public static MainController getInstance(ExchangeRatesDBHelper dbHelper) {
-        if (instance == null)
-                instance = new MainController(dbHelper);
+    public static MainController getInstance(ExchangeRatesDatabase database) {
+        synchronized (LOCK) {
+            if (instance == null)
+                instance = new MainController(database);
+        }
         return instance;
     }
 

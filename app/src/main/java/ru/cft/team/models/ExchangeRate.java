@@ -1,15 +1,24 @@
 package ru.cft.team.models;
 
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
+@Entity (tableName = "exchangeRates.db")
 public class ExchangeRate implements Comparable<ExchangeRate>{
-    private String id;
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+    private String idFromService;
     private String charCode;
     private int nominal;
     private String name;
     private double value;
     private Integer repeatIndex;
 
-    public ExchangeRate(String id, String charCode, int nominal, String name, double value) {
-        this.id = id;
+
+    @Ignore
+    public ExchangeRate(String idFromService, String charCode, int nominal, String name, double value) {
+        this.idFromService = idFromService;
         this.charCode = charCode;
         this.nominal = nominal;
         this.name = name;
@@ -17,13 +26,21 @@ public class ExchangeRate implements Comparable<ExchangeRate>{
         this.repeatIndex = 0;
     }
 
-    public ExchangeRate(String id, String charCode, int nominal, String name, double value, Integer repeatIndex) {
-        this(id, charCode, nominal, name, value);
+    @Ignore
+    public ExchangeRate(String idFromService, String charCode, int nominal, String name, double value, Integer repeatIndex) {
+        this(idFromService, charCode, nominal, name, value);
         this.repeatIndex = repeatIndex;
     }
 
-    public String getId() {
-        return id;
+    public ExchangeRate(int id, String idFromService, String charCode, int nominal, String name, double value, Integer repeatIndex) {
+        this(idFromService, charCode, nominal, name, value, repeatIndex);
+        this.id = id;
+     }
+
+    public int getId() { return id; }
+
+    public String getIdFromService() {
+        return idFromService;
     }
 
     public String getCharCode() {
@@ -44,8 +61,8 @@ public class ExchangeRate implements Comparable<ExchangeRate>{
 
     public Integer getRepeatIndex() { return repeatIndex; }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setIdFromService(String idFromService) {
+        this.idFromService = idFromService;
     }
 
     public void setCharCode(String charCode) {
@@ -65,6 +82,14 @@ public class ExchangeRate implements Comparable<ExchangeRate>{
     }
 
     public void setRepeatIndex(int repeatIndex) { this.repeatIndex = repeatIndex; }
+
+    public void setRepeatIndex(Integer repeatIndex) {
+        this.repeatIndex = repeatIndex;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
 
     @Override

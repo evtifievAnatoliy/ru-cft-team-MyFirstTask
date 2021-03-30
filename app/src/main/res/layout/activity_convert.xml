@@ -48,32 +48,43 @@
                 android:text="@string/labelConvertRatesTextViewFromActivityConvert"
                 android:textSize="24sp" />
 
-            <Spinner
-                android:id="@+id/spinnerConvertInActivityConvert"
+            <TextView
+                android:id="@+id/exchangeRateTextViewFromActivityConvert"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:padding="8dp" />
+                android:textSize="24sp"
+                android:padding="8dp"/>
 
-            <Button
-                android:id="@+id/buttonConvertFromRUInActivityConvert"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="8dp"
-                android:onClick="onClickButtonConvertFromRUInActivityConvert"
-                android:padding="8dp"
-                android:text="@string/buttonConvertFromRUInActivityConvert"
-                android:textSize="14sp" />
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/buttonConvertINRUInActivityConvert"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="8dp"
-                android:onClick="onClickButtonConvertInRUInActivityConvert"
-                android:padding="8dp"
-                android:text="@string/buttonConvertInRUInActivityConvert"
-                android:textSize="14sp" />
+                <Button
+                    android:id="@+id/buttonConvertFromRUInActivityConvert"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.45"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:onClick="onClickButtonConvertFromRUInActivityConvert"
+                    android:layout_margin="8dp"
+                    android:text="@string/buttonConvertFromRUInActivityConvert"
+                    android:textSize="14sp" />
+
+                <Button
+                    android:id="@+id/buttonConvertINRUInActivityConvert"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.45"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:onClick="onClickButtonConvertInRUInActivityConvert"
+                    android:layout_margin="8dp"
+                    android:text="@string/buttonConvertInRUInActivityConvert"
+                    android:textSize="14sp" />
+
+            </LinearLayout>>
+
+
 
             <TextView
                 android:id="@+id/resultTextViewFromActivityConvert"
@@ -82,6 +93,7 @@
                 android:layout_marginTop="28dp"
                 android:textSize="24sp"
                 android:textStyle="bold" />
+
         </LinearLayout>
     </ScrollView>
 

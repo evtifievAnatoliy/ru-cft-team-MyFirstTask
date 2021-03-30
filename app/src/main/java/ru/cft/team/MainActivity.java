@@ -32,14 +32,14 @@ import java.util.Locale;
 import javax.net.ssl.HttpsURLConnection;
 
 import ru.cft.team.controllers.MainController;
-import ru.cft.team.db.ExchangeRatesDBHelper;
+import ru.cft.team.dao.ExchangeRatesDatabase;
 import ru.cft.team.models.ExchangeRate;
 
 public class MainActivity extends AppCompatActivity {
 
 
     //подключаем базу данных
-    private ExchangeRatesDBHelper dbHelper;
+    private ExchangeRatesDatabase database;
 
     private ListView listViewExchangeRates;
     private Button buttonUpdate;
@@ -47,20 +47,20 @@ public class MainActivity extends AppCompatActivity {
     private String updateTimeStr;
     private boolean isRunning = false;
 
-    public ExchangeRatesDBHelper getDbHelper() {
-        return dbHelper;
+    public ExchangeRatesDatabase getDatabase() {
+        return database;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dbHelper = new ExchangeRatesDBHelper(this);
+        database = ExchangeRatesDatabase.getInstance(this);
         isRunning = true;
         setContentView(R.layout.activity_main);
-        listViewExchangeRates = (ListView) findViewById(R.id.listViewExchangeRates);
-        buttonUpdate = (Button) findViewById(R.id.buttonUpdate);
+        listViewExchangeRates = findViewById(R.id.listViewExchangeRates);
+        buttonUpdate = findViewById(R.id.buttonUpdate);
         arrayAdapter = new ArrayAdapter<ExchangeRate> (this, android.R.layout.simple_list_item_1,
-                MainController.getInstance(dbHelper).getExchangeRates().getList());
+                MainController.getInstance(database).getExchangeRates().getList());
         listViewExchangeRates.setAdapter(arrayAdapter);
         listViewExchangeRates.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         listViewExchangeRates.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -90,9 +90,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickItemListViewExchangeRates(int selectedItem) {
         Intent intent = new Intent(this, ConvertActivity.class);
-        intent.putExtra("selectedItem", selectedItem);
-        MainController.getInstance(dbHelper).getExchangeRates().setItemToRepeatMap(
-                (ExchangeRate) listViewExchangeRates.getItemAtPosition(selectedItem)
+        ExchangeRate exchangeRate = (ExchangeRate) listViewExchangeRates.getItemAtPosition(selectedItem);
+        intent.putExtra("selectedItem", exchangeRate.getIdFromService());
+        MainController.getInstance(database).getExchangeRates().setItemToRepeatMap(
+                exchangeRate
         );
         startActivity(intent);
     }
@@ -146,11 +147,11 @@ public class MainActivity extends AppCompatActivity {
     //класс для асинхронного получения данных с сервера валют.
     private static class DownloadJSONTask extends AsyncTask<String, Void, String>{
 
-        private ArrayAdapter<ExchangeRate> arrayAdapter;
-        private Button buttonUpdate;
+        private final ArrayAdapter<ExchangeRate> arrayAdapter;
+        private final Button buttonUpdate;
         private String updateTimeStr;
-        private String buttonUpdateName;
-        private MainActivity mainActivity;
+        private final String buttonUpdateName;
+        private final MainActivity mainActivity;
 
         public DownloadJSONTask(ArrayAdapter<ExchangeRate> arrayAdapter, Button buttonUpdate, String updateTimeStr, String buttonUpdateName, MainActivity mainActivity) {
             this.arrayAdapter = arrayAdapter;
@@ -204,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 //обновляем данные в контроллере
                 if(s!=null) {
-                    MainController.getInstance(mainActivity.getDbHelper()).getExchangeRates().setMapFromStr(s);
+                    MainController.getInstance(mainActivity.getDatabase()).getExchangeRates().setMapFromStr(s);
                     //добавляем информацию об времени обновления на кнопку Update
                     Time time = new Time(Time.getCurrentTimezone());
                     time.setToNow();

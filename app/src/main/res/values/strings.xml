@@ -3,7 +3,7 @@
     <string name="url">https://www.cbr-xml-daily.ru/daily_json.js</string>
     <string name="buttonUpdate">Update</string>
     <string name="labelSumTextViewFromActivityConvert">Enter the amount</string>
-    <string name="labelConvertRatesTextViewFromActivityConvert">Select a currency</string>
+    <string name="labelConvertRatesTextViewFromActivityConvert">Selected currency</string>
     <string name="buttonConvertFromRUInActivityConvert">Convert from RU</string>
     <string name="buttonConvertInRUInActivityConvert">Convert in RU</string>
     <string name="buttonBackFromActivityConvert">Back</string>
