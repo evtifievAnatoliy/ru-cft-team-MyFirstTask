@@ -2,13 +2,9 @@ package ru.cft.team.dao;
 
 import android.content.Context;
 
-import androidx.annotation.NonNull;
 import androidx.room.Database;
-import androidx.room.DatabaseConfiguration;
-import androidx.room.InvalidationTracker;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
-import androidx.sqlite.db.SupportSQLiteOpenHelper;
 
 import ru.cft.team.models.ExchangeRate;
 
@@ -23,7 +19,7 @@ public abstract class ExchangeRatesDatabase extends RoomDatabase {
         synchronized (LOCK) {
             if (database == null) {
                 database = Room.databaseBuilder(context, ExchangeRatesDatabase.class, DB_NAME)
-                        .allowMainThreadQueries() //удалить!!!
+                        .allowMainThreadQueries()
                         .build();
             }
         }

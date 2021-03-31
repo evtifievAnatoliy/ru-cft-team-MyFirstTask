@@ -2,6 +2,10 @@ package ru.cft.team;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,12 +13,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.text.format.Time;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -26,12 +26,9 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import java.sql.Timestamp;
-import java.util.Locale;
-
-
 import javax.net.ssl.HttpsURLConnection;
 
+import ru.cft.team.adapters.ExchangeRatesAdapter;
 import ru.cft.team.controllers.MainController;
 import ru.cft.team.dao.ExchangeRatesDatabase;
 import ru.cft.team.models.ExchangeRate;
@@ -42,9 +39,12 @@ public class MainActivity extends AppCompatActivity {
     //подключаем базу данных
     private ExchangeRatesDatabase database;
 
-    private ListView listViewExchangeRates;
+    //подключаем MainController
+    private MainController mainController;
+
+    private RecyclerView recyclerViewExchangeRates;
     private Button buttonUpdate;
-    private ArrayAdapter<ExchangeRate> arrayAdapter;
+    private ExchangeRatesAdapter exchangeRatesAdapter;
     private String updateTimeStr;
     private boolean isRunning = false;
 
@@ -55,21 +55,35 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        database = ExchangeRatesDatabase.getInstance(this);
+        mainController = ViewModelProviders.of(this).get(MainController.class);
         isRunning = true;
         setContentView(R.layout.activity_main);
-        listViewExchangeRates = findViewById(R.id.listViewExchangeRates);
+        recyclerViewExchangeRates = findViewById(R.id.recyclerViewExchangeRates);
         buttonUpdate = findViewById(R.id.buttonUpdate);
-        arrayAdapter = new ArrayAdapter<ExchangeRate> (this, android.R.layout.simple_list_item_1,
-                MainController.getInstance(database).getExchangeRates().getList());
-        listViewExchangeRates.setAdapter(arrayAdapter);
-        listViewExchangeRates.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        listViewExchangeRates.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        exchangeRatesAdapter = new ExchangeRatesAdapter(mainController.getExchangeRates().getList());
+        recyclerViewExchangeRates.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewExchangeRates.setAdapter(exchangeRatesAdapter);
+        //подключаем слушатель для RecyclerView
+        exchangeRatesAdapter.setOnExchangeRateClickListener(new ExchangeRatesAdapter.OnExchangeRateClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                onClickItemListViewExchangeRates(position);
+            public void onExchangeRateClick(int position) {
+                onClickItemRecyclerViewExchangeRates(position);
             }
         });
+        //добавляем смахивание (Swiped) для RecyclerView
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                onClickItemRecyclerViewExchangeRates(viewHolder.getAdapterPosition());
+            }
+        });
+        itemTouchHelper.attachToRecyclerView(recyclerViewExchangeRates);
+
         //если активность запускается не первый раз
         if(savedInstanceState!=null) {
             updateTimeStr = savedInstanceState.getString("updateTimeStr");
@@ -78,22 +92,26 @@ public class MainActivity extends AppCompatActivity {
         else{
             //Если запускаем первый раз, то читаем дату последнего обновления из  SharedPreferences (постоянное хранение данных)
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            String str = preferences.getString("updateTimeStr", "first");
+            updateTimeStr = preferences.getString("updateTimeStr", "first");
             buttonUpdate.setText(getResources().getString(R.string.buttonUpdate) + "(" +
                     preferences.getString("updateTimeStr", "first") + ")");
         }
         runUpdatingExchangeRates();
     }
 
+    public MainController getMainController() {
+        return mainController;
+    }
+
     public void onClickButtonUpdate(View view) {
         startDownloadJSONTask();
     }
 
-    public void onClickItemListViewExchangeRates(int selectedItem) {
+    public void onClickItemRecyclerViewExchangeRates(int selectedItem) {
         Intent intent = new Intent(this, ConvertActivity.class);
-        ExchangeRate exchangeRate = (ExchangeRate) listViewExchangeRates.getItemAtPosition(selectedItem);
+        ExchangeRate exchangeRate = mainController.getExchangeRates().getExchangeRate(selectedItem);
         intent.putExtra("selectedItem", exchangeRate.getIdFromService());
-        MainController.getInstance(database).getExchangeRates().setItemToRepeatMap(
+        mainController.getExchangeRates().setItemToRepeatMap(
                 exchangeRate
         );
         startActivity(intent);
@@ -132,11 +150,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         isRunning = true;
+        //обновим данные в RecyclerView
+        if (exchangeRatesAdapter!=null)
+            exchangeRatesAdapter.notifyDataSetChanged();
     }
 
     private void startDownloadJSONTask(){
         try {
-            DownloadJSONTask task = new DownloadJSONTask(arrayAdapter, buttonUpdate, updateTimeStr, getResources().getString(R.string.buttonUpdate), this);
+            DownloadJSONTask task = new DownloadJSONTask(exchangeRatesAdapter, buttonUpdate, updateTimeStr, getResources().getString(R.string.buttonUpdate), this);
             task.execute(getResources().getString(R.string.url));
 
         }
@@ -148,14 +169,14 @@ public class MainActivity extends AppCompatActivity {
     //класс для асинхронного получения данных с сервера валют.
     private static class DownloadJSONTask extends AsyncTask<String, Void, String>{
 
-        private final ArrayAdapter<ExchangeRate> arrayAdapter;
+        private final ExchangeRatesAdapter exchangeRatesAdapter;
         private final Button buttonUpdate;
         private String updateTimeStr;
         private final String buttonUpdateName;
         private final MainActivity mainActivity;
 
-        public DownloadJSONTask(ArrayAdapter<ExchangeRate> arrayAdapter, Button buttonUpdate, String updateTimeStr, String buttonUpdateName, MainActivity mainActivity) {
-            this.arrayAdapter = arrayAdapter;
+        public DownloadJSONTask(ExchangeRatesAdapter exchangeRatesAdapter, Button buttonUpdate, String updateTimeStr, String buttonUpdateName, MainActivity mainActivity) {
+            this.exchangeRatesAdapter = exchangeRatesAdapter;
             this.buttonUpdate = buttonUpdate;
             this.updateTimeStr = updateTimeStr;
             this.buttonUpdateName = buttonUpdateName;
@@ -206,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 //обновляем данные в контроллере
                 if(s!=null) {
-                    updateTimeStr = MainController.getInstance(mainActivity.getDatabase()).getExchangeRates().setMapFromStr(s);
+                    updateTimeStr = mainActivity.getMainController().getExchangeRates().setMapFromStr(s);
                     //добавляем информацию об времени обновления на кнопку Update
                     if (updateTimeStr != null) {
                         String[] updateTimeStrs = updateTimeStr.split("[T+]");
@@ -216,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
                     else
                         updateTimeStr = "ParseAtrIsNull";
                     buttonUpdate.setText(buttonUpdateName + "(" + updateTimeStr + ")");
-                    arrayAdapter.notifyDataSetChanged();
+                    exchangeRatesAdapter.notifyDataSetChanged();
                     //Добавление последней даты обновления в  SharedPreferences (постоянное хранение данных)
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
                     preferences.edit().putString("updateTimeStr", updateTimeStr).apply();

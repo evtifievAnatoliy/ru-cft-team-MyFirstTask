@@ -1,5 +1,7 @@
 package ru.cft.team.controllers;
 
+import androidx.lifecycle.LiveData;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -96,9 +98,13 @@ public class ExchangeRates {
 
         }
         database.exchangeRatesDao().updateExchangeRate(exchangeRate);
+        Collections.sort(getList());
     }
 
     public ExchangeRate getExchangeRate(String idFromService) {
         return map.get(idFromService);
+    }
+    public ExchangeRate getExchangeRate(int position) {
+        return list.get(position);
     }
 }
