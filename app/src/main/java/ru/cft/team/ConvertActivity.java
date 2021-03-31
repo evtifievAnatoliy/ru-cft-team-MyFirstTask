@@ -1,11 +1,17 @@
 package ru.cft.team;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -20,14 +26,13 @@ import ru.cft.team.models.ExchangeRate;
 
 public class ConvertActivity extends AppCompatActivity {
 
-    //подключаем базу данных
-    private ExchangeRatesDatabase database;
+    //подключаем MainController
+    private MainController mainController;
 
-    //Spiner изначально устанавливается на выбранном элементе из главной антивности
-    //Использую именно Spiner, т.к. хочу дать возможность пользователю выбрать так же другую валюту для конвертации
     private TextView exchangeRateTextViewFromActivityConvert;
     private EditText editTextNumberFromActivityConvert;
     private TextView resultTextViewFromActivityConver;
+
 
     //валюта
     private ExchangeRate exchangeRate;
@@ -42,10 +47,10 @@ public class ConvertActivity extends AppCompatActivity {
         exchangeRateTextViewFromActivityConvert = findViewById(R.id.exchangeRateTextViewFromActivityConvert);
         editTextNumberFromActivityConvert = findViewById(R.id.editTextNumberFromActivityConvert);
         resultTextViewFromActivityConver = findViewById(R.id.resultTextViewFromActivityConvert);
-        database = ExchangeRatesDatabase.getInstance(this);
+        mainController = ViewModelProviders.of(this).get(MainController.class);
 
         Object o = intent.getStringExtra("selectedItem");
-        exchangeRate = MainController.getInstance(database).getExchangeRates().getExchangeRate(o.toString());
+        exchangeRate = mainController.getExchangeRates().getExchangeRate(o.toString());
         exchangeRateTextViewFromActivityConvert.setText(exchangeRate.toString());
 
         //если активность запускается не первый раз
@@ -60,6 +65,7 @@ public class ConvertActivity extends AppCompatActivity {
         finish();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public void onClickButtonConvertFromRUInActivityConvert(View view) {
         if(editTextNumberFromActivityConvert.getText().toString().isEmpty())
             Toast.makeText(this, getResources().getString(R.string.labelSumTextViewFromActivityConvert), Toast.LENGTH_SHORT).show();
@@ -70,6 +76,7 @@ public class ConvertActivity extends AppCompatActivity {
                 resultStr = String.format(Locale.getDefault(), getResources().getString(R.string.result_conver_string_from_RU),
                         amount, exchangeRate.getName(), exchangeRate.getNumbersForAmountFromRU(amount), exchangeRate.getCharCode());
                 resultTextViewFromActivityConver.setText(resultStr);
+                hideKeyboard(view);
             } catch (NullPointerException e) {
                 Toast.makeText(this, "NullPointerException: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             } catch (NumberFormatException e) {
@@ -79,6 +86,7 @@ public class ConvertActivity extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public void onClickButtonConvertInRUInActivityConvert(View view) {
         if (editTextNumberFromActivityConvert.getText().toString().isEmpty())
             Toast.makeText(this, getResources().getString(R.string.labelSumTextViewFromActivityConvert), Toast.LENGTH_SHORT).show();
@@ -89,6 +97,7 @@ public class ConvertActivity extends AppCompatActivity {
                 resultStr = String.format(Locale.getDefault(), getResources().getString(R.string.result_conver_string_in_RU),
                         amount, exchangeRate.getName(), exchangeRate.getNumbersForAmountInRU(amount));
                 resultTextViewFromActivityConver.setText(resultStr);
+                hideKeyboard(view);
             } catch (NullPointerException e) {
                 Toast.makeText(this, "NullPointerException: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             } catch (NumberFormatException e) {
@@ -113,6 +122,12 @@ public class ConvertActivity extends AppCompatActivity {
         outState.putString("resultStr", resultStr);
     }
 
+    //метод для того, чтобы скрыть клавиатуру
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void hideKeyboard(View view) {
+        InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
 
 
 }
